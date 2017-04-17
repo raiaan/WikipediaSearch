@@ -3,6 +3,8 @@ package com.example.ryaan.wikipediasearch;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -26,13 +28,20 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.search_text)
     EditText searchText;
+
+    @BindView(R.id.result)
+    RecyclerView result;
+    RecyclerView.LayoutManager layoutManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        result.setHasFixedSize(true);
+        layoutManager=new LinearLayoutManager(this);
+        result.setLayoutManager(layoutManager);
     }
 
    public class GetResult extends AsyncTask<Object, Object, String> {
@@ -104,9 +113,10 @@ public class MainActivity extends AppCompatActivity {
    public void search(View v){
        //Log.v("msg",searchText.getText().toString());
        GetResult getResult = new GetResult();
-       getResult.execute("egypt");
+       getResult.execute(searchText.getText().toString());
        try {
-           Log.v("msg",getResult.get());
+           result.setAdapter(new ResultAdapter(getResult.get()));
+
        } catch (InterruptedException e) {
            e.printStackTrace();
        } catch (ExecutionException e) {

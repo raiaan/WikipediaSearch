@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,9 +27,9 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.search_text)
+    //@BindView(R.id.search_text)
     EditText searchText;
-
+    DatabaseHandler databaseHandler;
     @BindView(R.id.result)
     RecyclerView result;
     RecyclerView.LayoutManager layoutManager;
@@ -39,9 +40,11 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        searchText=(EditText) findViewById(R.id.search_text);
         result.setHasFixedSize(true);
         layoutManager=new LinearLayoutManager(this);
         result.setLayoutManager(layoutManager);
+        databaseHandler=new DatabaseHandler(this);
     }
 
    public class GetResult extends AsyncTask<Object, Object, String> {
@@ -71,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
            String jsonSearchResult = null;
            try {
                URL url = new URL("https://en.wikipedia.org/w/api.php?action=opensearch&search=" + params[0] + "&limit=10&namespace=0&format=json");
-               // Create the request to OpenWeatherMap, and open the connection
                urlConnection = (HttpURLConnection) url.openConnection();
                urlConnection.setRequestMethod("GET");
                urlConnection.connect();
@@ -111,16 +113,20 @@ public class MainActivity extends AppCompatActivity {
        }
    }
    public void search(View v){
-       //Log.v("msg",searchText.getText().toString());
+
        GetResult getResult = new GetResult();
        getResult.execute(searchText.getText().toString());
        try {
            result.setAdapter(new ResultAdapter(getResult.get()));
+           databaseHandler.addData(searchText.getText().toString(),getResult.get());
+
+           Log.v("t2",databaseHandler.getData(searchText.getText().toString()));
 
        } catch (InterruptedException e) {
            e.printStackTrace();
        } catch (ExecutionException e) {
            e.printStackTrace();
        }
+
    }
 }
